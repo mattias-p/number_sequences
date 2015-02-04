@@ -45,21 +45,27 @@ function M.BinaryToGray (n)
 end
 
 --
-local function AuxFirstN (n, gray)
-	if gray then
-		local index = _GrayToBinary_(gray)
+local function AuxFirstN (n, prev)
+	if prev then
+		local index = _GrayToBinary_(prev) + 1
 
-		if index < n then
-			return _BinaryToGray_(index + 1)
+		if index <= n then
+			return _BinaryToGray_(index), index
 		end
 	else
-		return 0
+		return 0, 0
 	end
 end
 
 --- DOCME
-function M.FirstN (n)
-	return AuxFirstN, (n or 2^32) - 1, false
+function M.FirstN (n, prev)
+	n = (n or 2^32) - 1
+
+	if prev then
+		n = _GrayToBinary_(prev) + n + 1
+	end
+
+	return AuxFirstN, n, prev or false
 end
 
 --- DOCME
