@@ -78,6 +78,11 @@ function M.GrayToBinary (gray)
 	return bxor(gray, rshift(gray, 1))
 end
 
+--- DOCME
+function M.Next (gray)
+	return _BinaryToGray_(_GrayToBinary_(gray) + 1)
+end
+
 -- Cache module members.
 _BinaryToGray_ = M.BinaryToGray
 _GrayToBinary_ = M.GrayToBinary
