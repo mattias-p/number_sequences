@@ -40,6 +40,8 @@ local _GrayToBinary_
 local M = {}
 
 --- DOCME
+-- @uint n
+-- @treturn uint X
 function M.BinaryToGray (n)
 	return bxor(rshift(n, 1), n)
 end
@@ -58,6 +60,9 @@ local function AuxFirstN (n, prev)
 end
 
 --- DOCME
+-- @uint n
+-- @uint[opt] prev
+-- @treturn iterator X
 function M.FirstN (n, prev)
 	n = (n or 2^32) - 1
 
@@ -69,6 +74,8 @@ function M.FirstN (n, prev)
 end
 
 --- DOCME
+-- @uint gray
+-- @treturn uint d
 function M.GrayToBinary (gray)
 	gray = bxor(gray, rshift(gray, 16))
 	gray = bxor(gray, rshift(gray, 8))
@@ -79,6 +86,8 @@ function M.GrayToBinary (gray)
 end
 
 --- DOCME
+-- @uint gray
+-- @treturn uint X
 function M.Next (gray)
 	return _BinaryToGray_(_GrayToBinary_(gray) + 1)
 end
