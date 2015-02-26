@@ -1,4 +1,4 @@
---- Some Gray code utilities.
+--- Some [Gray code](http://en.wikipedia.org/wiki/Gray_code) utilities.
 
 --
 -- Permission is hereby granted, free of charge, to any person obtaining
@@ -39,14 +39,16 @@ local _GrayToBinary_
 -- Exports --
 local M = {}
 
---- DOCME
--- @uint n
--- @treturn uint X
+--- Converts an unsigned integer (binary) to a Gray code.
+--
+-- This is an inverse of @{GrayToBinary}.
+-- @uint n Binary value, &ge; 0.
+-- @treturn uint Gray code.
 function M.BinaryToGray (n)
 	return bxor(rshift(n, 1), n)
 end
 
---
+-- Helper to iterate Gray codes
 local function AuxFirstN (n, prev)
 	if prev then
 		local index = _GrayToBinary_(prev) + 1
@@ -59,10 +61,14 @@ local function AuxFirstN (n, prev)
 	end
 end
 
---- DOCME
--- @uint n
--- @uint[opt] prev
--- @treturn iterator X
+--- Iterates over a series of Gray codes.
+-- @uint[opt=2^32] n Number of iterations.
+-- @uint[opt] prev If present, iteration starts at the next Gray code, i.e. at `Next(prev)`.
+-- If absent, it begins at 0.
+-- @treturn iterator Supplies the following, in order, at each iteration:
+--
+-- * Gray code.
+-- * Binary value, i.e. `GrayToBinary(gray)`.
 function M.FirstN (n, prev)
 	n = (n or 2^32) - 1
 
@@ -73,9 +79,11 @@ function M.FirstN (n, prev)
 	return AuxFirstN, n, prev or false
 end
 
---- DOCME
--- @uint gray
--- @treturn uint d
+--- Converts a Gray code to an unsigned inte
+--
+-- This is an inverse of @{BinaryToGray}.
+-- @uint gray Gray code.
+-- @treturn uint Binary value.
 function M.GrayToBinary (gray)
 	gray = bxor(gray, rshift(gray, 16))
 	gray = bxor(gray, rshift(gray, 8))
@@ -85,9 +93,9 @@ function M.GrayToBinary (gray)
 	return bxor(gray, rshift(gray, 1))
 end
 
---- DOCME
--- @uint gray
--- @treturn uint X
+--- Successor.
+-- @uint gray Gray code.
+-- @treturn uint Next Gray code, i.e. `BinaryToGray(GrayToBinary(gray) + 1)`.
 function M.Next (gray)
 	return _BinaryToGray_(_GrayToBinary_(gray) + 1)
 end
