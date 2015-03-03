@@ -23,6 +23,10 @@
 -- [ MIT license: http://www.opensource.org/licenses/mit-license.php ]
 --
 
+-- Standard library imports --
+local abs = math.abs
+local frexp = math.frexp
+
 -- Modules --
 local operators = require("bitwise_ops.operators")
 
@@ -61,6 +65,17 @@ local function AuxFirstN (n, prev)
 	end
 end
 
+--
+local function FirstNBody (n, prev, iter)
+	n = (n or 2^32) - 1
+
+	if prev then
+		n = _GrayToBinary_(prev) + n + 1
+	end
+
+	return iter, n, prev or false	
+end
+
 --- Iterates over a series of Gray codes.
 -- @uint[opt=2^32] n Number of iterations.
 -- @uint[opt] prev If present, iteration starts at the next Gray code, i.e. at `Next(prev)`.
@@ -70,13 +85,24 @@ end
 -- * Gray code.
 -- * Binary value, i.e. `GrayToBinary(gray)`.
 function M.FirstN (n, prev)
-	n = (n or 2^32) - 1
+	return FirstNBody(n, prev, AuxFirstN, false)
+end
 
-	if prev then
-		n = _GrayToBinary_(prev) + n + 1
+--
+local function AuxFirstN_Change (n, prev)
+	local index = _GrayToBinary_(prev) + 1
+
+	if index <= n then
+		local gray = _BinaryToGray_(index)
+		local _, exp = frexp(abs(gray - prev))
+
+		return gray, exp
 	end
+end
 
-	return AuxFirstN, n, prev or false
+--- DOCME
+function M.FirstN_Change (n, prev)
+	return FirstNBody(n, prev or 0, AuxFirstN_Change)
 end
 
 --- Converts a Gray code to an unsigned inte
