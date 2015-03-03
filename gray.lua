@@ -24,7 +24,6 @@
 --
 
 -- Standard library imports --
-local abs = math.abs
 local frexp = math.frexp
 
 -- Modules --
@@ -89,14 +88,21 @@ function M.FirstN (n, prev)
 end
 
 --
+local function Change (index, prev)
+	local gray = _BinaryToGray_(index)
+	local diff = gray - prev
+	local added = diff > 0
+	local _, exp = frexp(added and diff or -diff)
+
+	return gray, exp, added
+end
+
+--
 local function AuxFirstN_Change (n, prev)
 	local index = _GrayToBinary_(prev) + 1
 
 	if index <= n then
-		local gray = _BinaryToGray_(index)
-		local _, exp = frexp(abs(gray - prev))
-
-		return gray, exp
+		return Change(index, prev)
 	end
 end
 
@@ -124,6 +130,11 @@ end
 -- @treturn uint Next Gray code, i.e. `BinaryToGray(GrayToBinary(gray) + 1)`.
 function M.Next (gray)
 	return _BinaryToGray_(_GrayToBinary_(gray) + 1)
+end
+
+--- DOCME
+function M.Next_Change (gray)
+	return Change(_GrayToBinary_(gray) + 1)
 end
 
 -- Cache module members.
