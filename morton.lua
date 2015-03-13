@@ -166,23 +166,25 @@ end
 --
 local function LineIter (get_comp, update_comp)
 	return function(last, num)
-		if num <= last then
-			local later = true
+		if not num then
+			return 0, 0
+		elseif num < 0 then
+			return -num, get_comp(-num)
+		else
+			local comp, was = get_comp(num) + 1, num
 
-			if num <= 0 then
-				num, later = -num, false
+			num = update_comp(num, comp)
+
+			if num <= last and num > was then
+				return num, comp
 			end
-
-			local comp = get_comp(num)
-
-			if later then
-				comp = get_comp(num) + 1
-				num = update_comp(num, comp)
-			end
-
-			return num, comp
 		end
 	end
+end
+
+--
+local function Value0 (first)
+	return first > 0 and -first
 end
 
 --
@@ -192,7 +194,7 @@ local AuxLine2_X = LineIter(M.MortonPair_X, M.MortonPairUpdate_X)
 function M.Morton2_LineX (y, x1, x2)
 	x1, x2 = GetRange(x1, x2 or 0xFFFF)
 
-	return AuxLine2_X, _Morton2_(x2, y), -_Morton2_(x1, y)
+	return AuxLine2_X, _Morton2_(x2, y), Value0(_Morton2_(x1, y))
 end
 
 --
@@ -202,7 +204,7 @@ local AuxLine2_Y = LineIter(M.MortonPair_Y, M.MortonPairUpdate_Y)
 function M.Morton2_LineY (x, y1, y2)
 	y1, y2 = GetRange(y1, y2 or 0xFFFF)
 
-	return AuxLine2_Y, _Morton2_(x, y2), -_Morton2_(x, y2)
+	return AuxLine2_Y, _Morton2_(x, y2), Value0(_Morton2_(x, y2))
 end
 
 --- Builds a Morton number out of three parts.
@@ -222,7 +224,7 @@ local AuxLine3_X = LineIter(M.MortonTriple_X, M.MortonTripleUpdate_X)
 function M.Morton3_LineX (y, z, x1, x2)
 	x1, x2 = GetRange(x1, x2 or 0x3FF)
 
-	return AuxLine3_X, _Morton3_(x2, y, z), -_Morton3_(x1, y, z)
+	return AuxLine3_X, _Morton3_(x2, y, z), Value0(_Morton3_(x1, y, z))
 end
 
 --
@@ -232,22 +234,26 @@ local AuxLine3_Y = LineIter(M.MortonTriple_Y, M.MortonTripleUpdate_Y)
 function M.Morton3_LineY (x, z, y1, y2)
 	y1, y2 = GetRange(y1, y2 or 0x3FF)
 
-	return AuxLine3_Y, _Morton3_(x, y2, z), -_Morton3_(x, y1, z)
+	return AuxLine3_Y, _Morton3_(x, y2, z), Value0(_Morton3_(x, y1, z))
 end
 
 --
-local AuxLine3_Z = LineIter(M.MortonTriple_Z, M.MortonTripleUpdate_Y)
+local AuxLine3_Z = LineIter(M.MortonTriple_Z, M.MortonTripleUpdate_Z)
 
 --- DOCME
 function M.Morton3_LineZ (x, y, z1, z2)
-	z1, z2 = GetRange(z1 or 1, z2 or 0x3FF)
+	z1, z2 = GetRange(z1, z2 or 0x3FF)
 
-	return AuxLine3_Z, _Morton3_(x, y, z2), -_Morton3_(x, y, z1)
+	return AuxLine3_Z, _Morton3_(x, y, z2), Value0(_Morton3_(x, y, z1))
 end
 
 -- Cache module members.
 _Morton2_ = M.Morton2
 _Morton3_ = M.Morton3
+
+-- TODO: add four- or five-element versions, e.g. http://asgerhoedt.dk/?p=276?
+-- ^^^ Distances
+-- http://en.wikipedia.org/wiki/Z-order_curve: add / sub, comp func
 
 -- Export the module.
 return M
